@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-// --- 1. MOCK DATA (Giả lập Database) ---
 interface Trip {
     id: string;
     propertyName: string;

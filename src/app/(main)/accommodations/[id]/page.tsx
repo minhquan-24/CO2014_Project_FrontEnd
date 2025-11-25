@@ -303,7 +303,7 @@ export default function AccommodationDetailPage() {
     const params = useParams(); 
 
     // chuyển true/false để test giao diện Host/Guest
-    const isHostViewing = true;
+    const isHostViewing = false;
 
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');

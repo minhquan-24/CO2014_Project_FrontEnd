@@ -36,8 +36,6 @@ export default function CreateListingPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
-        // Demo độ trễ mạng
         setTimeout(() => {
             console.log("--- START TRANSACTION ---");
             console.log("1. INSERT INTO Location (City, Address)... VALUES", formData.city, formData.address);

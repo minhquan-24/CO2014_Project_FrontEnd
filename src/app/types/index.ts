@@ -1,12 +1,10 @@
-// src/types/index.ts
-
 // 1. Khuôn mẫu cho User (Guest/Host/Admin)
 export interface User {
     userID: string;
     name: string;
     email: string;
     role: 'Guest' | 'Host' | 'Admin';
-    avatarUrl?: string; // Dấu ? nghĩa là có thể null
+    avatarUrl?: string;
 }
 
 // 2. Khuôn mẫu cho Căn nhà (Accommodation)
@@ -19,15 +17,15 @@ export interface Accommodation {
     maxGuests: number;
     averageRating: number;
     totalReviews: number;
-    imageUrl: string;     // Frontend cần ảnh để hiện cho đẹp
+    imageUrl: string;    
     hostID: string;
 }
 
 // 3. Khuôn mẫu cho Booking (Đơn đặt)
 export interface Booking {
     bookingID: string;
-    accommodationTitle: string; // Để hiện tên nhà
-    checkIn: string; // Dùng string cho ngày tháng ở FE cho dễ
+    accommodationTitle: string; 
+    checkIn: string; 
     checkOut: string;
     totalPrice: number;
     status: 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed';

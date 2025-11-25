@@ -6,7 +6,7 @@ export interface Accommodation {
     pricePerNight: number;
     averageRating: number;
     imageUrl: string;
-    category: 'Hanoi' | 'VungTau' | 'Seoul' | 'Trending'; // Thêm category để lọc
+    category: 'Hanoi' | 'VungTau' | 'Seoul' | 'Trending';
 }
 
 export const MOCK_ACCOMMODATIONS: Accommodation[] = [

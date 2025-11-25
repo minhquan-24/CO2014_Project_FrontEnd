@@ -58,7 +58,6 @@ export default function HostDashboardPage() {
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Nhà của tôi</h1>
-                    <p className="text-gray-500 mt-1">Quản lý tài sản và xem hiệu suất hoạt động.</p>
                 </div>
                 <Link
                     href="/host/listings/create"

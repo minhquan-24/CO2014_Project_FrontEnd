@@ -20,7 +20,6 @@ export default function Footer() {
                         English (US)
                     </div>
                     <div className="cursor-pointer hover:underline">USD</div>
-                    {/* Social Icons (Bạn tự thêm SVG nếu thích) */}
                 </div>
             </div>
         </footer>
