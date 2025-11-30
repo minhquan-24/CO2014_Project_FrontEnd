@@ -1,30 +1,103 @@
-// src/app/components/ui/HeroSearchBar.tsx
 'use client';
 
-export default function HeroSearchBar() {
+import { useState } from 'react';
+
+// Định nghĩa kiểu dữ liệu params để truyền đi
+export interface SearchParams {
+    keyword: string;
+    checkIn: string;
+    checkOut: string;
+    guests: number;
+}
+
+interface Props {
+    onSearch?: (params: SearchParams) => void;
+}
+
+export default function HeroSearchBar({ onSearch }: Props) {
+    const [keyword, setKeyword] = useState('');
+    const [checkIn, setCheckIn] = useState('');
+    const [checkOut, setCheckOut] = useState('');
+    const [guests, setGuests] = useState(1);
+
+    const handleSearch = () => {
+        if (onSearch) {
+            onSearch({
+                keyword,
+                checkIn,
+                checkOut,
+                guests
+            });
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     return (
-        <div className="border border-gray-200 rounded-full shadow-lg hover:shadow-xl transition-shadow bg-white p-2 flex items-center max-w-4xl mx-auto divide-x divide-gray-200">
-            <div className="flex-1 px-6 py-2 hover:bg-gray-100 rounded-full cursor-pointer group">
-                <div className="text-xs font-bold text-gray-800">Địa điểm</div>
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm điểm đến"
-                    className="w-full text-sm text-gray-600 placeholder-gray-400 bg-transparent outline-none group-hover:bg-transparent"
+        <div className="w-full max-w-4xl mx-auto bg-white rounded-full shadow-lg border border-gray-200 flex items-center p-2">
+            
+            {/* 1. ĐỊA ĐIỂM */}
+            <div className="flex-1 px-6 border-r border-gray-200 relative">
+                <label className="block text-xs font-bold text-gray-800 ml-1">Địa điểm</label>
+                <input 
+                    type="text" 
+                    placeholder="Tìm kiếm điểm đến" 
+                    className="w-full outline-none text-sm text-gray-600 placeholder-gray-400 bg-transparent truncate"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    onKeyDown={handleKeyDown}
                 />
             </div>
-            <div className="flex-1 px-6 py-2 hover:bg-gray-100 rounded-full cursor-pointer">
-                <div className="text-xs font-bold text-gray-800">Thời gian</div>
-                <div className="text-sm text-gray-400">Thêm ngày</div>
+
+            {/* 2. NHẬN PHÒNG */}
+            <div className="hidden md:block flex-1 px-6 border-r border-gray-200">
+                <label className="block text-xs font-bold text-gray-800">Nhận phòng</label>
+                <input 
+                    type="date"
+                    className="w-full outline-none text-sm text-gray-600 bg-transparent cursor-pointer"
+                    value={checkIn}
+                    onChange={(e) => setCheckIn(e.target.value)}
+                />
             </div>
-            <div className="flex-[0.8] pl-6 pr-2 py-2 hover:bg-gray-100 rounded-full cursor-pointer flex items-center justify-between">
-                <div>
-                    <div className="text-xs font-bold text-gray-800">Khách</div>
-                    <div className="text-sm text-gray-400">Thêm khách</div>
-                </div>
-                <button className="bg-rose-500 hover:bg-rose-600 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style={{ display: 'block', fill: 'none', height: '16px', width: '16px', stroke: 'currentColor', strokeWidth: 4, overflow: 'visible' }} aria-hidden="true" role="presentation" focusable="false"><path fill="none" d="M13 24a11 11 0 1 0 0-22 11 11 0 0 0 0 22zm8-3 9 9"></path></svg>
-                </button>
+            
+            {/* 3. TRẢ PHÒNG */}
+            <div className="hidden md:block flex-1 px-6 border-r border-gray-200">
+                <label className="block text-xs font-bold text-gray-800">Trả phòng</label>
+                <input 
+                    type="date"
+                    className="w-full outline-none text-sm text-gray-600 bg-transparent cursor-pointer"
+                    value={checkOut}
+                    min={checkIn} // Validate ngày trả phải sau ngày nhận
+                    onChange={(e) => setCheckOut(e.target.value)}
+                />
             </div>
+
+            {/* 4. KHÁCH */}
+            <div className="hidden md:block flex-1 px-6 relative">
+                <label className="block text-xs font-bold text-gray-800">Khách</label>
+                <input 
+                    type="number"
+                    min={1}
+                    className="w-full outline-none text-sm text-gray-600 bg-transparent"
+                    placeholder="Thêm khách"
+                    value={guests}
+                    onChange={(e) => setGuests(Number(e.target.value))}
+                />
+            </div>
+
+            {/* NÚT SEARCH */}
+            <button 
+                onClick={handleSearch}
+                className="bg-rose-500 hover:bg-rose-600 text-white rounded-full p-3 m-1 transition-all flex items-center justify-center shadow-md"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+            </button>
         </div>
     );
 }

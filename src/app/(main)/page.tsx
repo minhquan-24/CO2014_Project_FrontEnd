@@ -1,43 +1,218 @@
-// src/app/(main)/page.tsx
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
 import HeroSearchBar from '@/app/components/ui/HeroSearchBar';
-import ListingCard from '@/app/components/card/ListingCard';
-import { MOCK_ACCOMMODATIONS } from '@/app/data/mockData';
+import Link from 'next/link';
 
-export default function GuestHomePage() {
+// --- COMPONENT LISTING SECTION & GRID (Giữ nguyên code cũ của bạn) ---
+// (Mình lược bớt đoạn render component con để code ngắn gọn, bạn giữ nguyên phần ListingSection và ListingGrid nhé)
+const ListingSection = ({ title, items }: { title: string, items: any[] }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    // Lọc data theo category
-    const hanoiList = MOCK_ACCOMMODATIONS.filter(item => item.category === 'Hanoi');
-    const vungtauList = MOCK_ACCOMMODATIONS.filter(item => item.category === 'VungTau');
-    const seoulList = MOCK_ACCOMMODATIONS.filter(item => item.category === 'Seoul');
+    if (!items || items.length === 0) return null;
 
-    const renderSection = (title: string, items: typeof hanoiList) => (
-        <section className="mb-12">
+    const handleScroll = (direction: 'left' | 'right') => {
+        if (containerRef.current) {
+            const scrollAmount = containerRef.current.clientWidth * 0.8;
+            containerRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    return (
+        <section className="mb-12 group">
             <div className="flex justify-between items-center mb-4 px-2">
                 <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-                <div className="flex gap-2">
-                    <button className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100">&lt;</button>
-                    <button className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100">&gt;</button>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button onClick={() => handleScroll('left')} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 bg-white shadow-sm">&lt;</button>
+                    <button onClick={() => handleScroll('right')} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 bg-white shadow-sm">&gt;</button>
                 </div>
             </div>
-            <div className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-hide px-2 -mx-2">
+            <div ref={containerRef} className="flex gap-6 overflow-x-auto pb-4 snap-x scrollbar-hide -mx-4 px-4 scroll-smooth">
                 {items.map(item => (
-                    <ListingCard key={item.id} data={item} />
+                    <Link
+                        href={`/accommodations/${item.id}`}
+                        key={item.id}
+                        className="min-w-[270px] w-[270px] snap-start cursor-pointer group/card flex-shrink-0"
+                    >
+                        <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-200 mb-3">
+                            <img
+                                src={item.imageUrl}
+                                alt={item.title}
+                                className="h-full w-full object-cover group-hover/card:scale-105 transition duration-300"
+                            />
+                            <div className="absolute top-3 right-3 text-white/70 hover:text-white hover:scale-110 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 drop-shadow-md"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-900 text-[15px] truncate w-full">{item.title}</h3>
+                            <div className="flex items-center gap-2 mt-0.5 text-sm text-gray-500">
+                                <p className="truncate max-w-[180px]">{item.locationCity}</p>
+                                <span>·</span>
+                                <div className="flex items-center gap-1 text-black font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" /></svg>
+                                    <span>{item.rating || 'New'}</span>
+                                </div>
+                            </div>
+                            <div className="mt-1.5 flex items-baseline gap-1">
+                                <span className="font-semibold text-gray-900 text-[15px]">
+                                    {item.pricePerNight.toLocaleString()}₫
+                                </span>
+                                <span className="text-gray-500 text-sm"> đêm</span>
+                            </div>
+                        </div>
+                    </Link>
                 ))}
             </div>
         </section>
     );
+};
+
+const ListingGrid = ({ title, items }: { title: string, items: any[] }) => {
+    const [visibleCount, setVisibleCount] = useState(8);
+
+    if (!items || items.length === 0) return null;
+
+    const handleShowMore = () => {
+        setVisibleCount(prev => prev + 8);
+    };
+
+    return (
+        <section className="mb-20">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 px-2">{title}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10 px-2">
+                {items.slice(0, visibleCount).map(item => (
+                    <Link
+                        href={`/accommodations/${item.id}`}
+                        key={item.id}
+                        className="cursor-pointer group/card w-full"
+                    >
+                        <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-200 mb-3">
+                            <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover group-hover/card:scale-105 transition duration-300" />
+                            <div className="absolute top-3 right-3 text-white/70 hover:text-white hover:scale-110 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 drop-shadow-md"><path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" /></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-900 text-[15px] truncate w-full">{item.title}</h3>
+                            <div className="flex items-center gap-2 mt-0.5 text-sm text-gray-500">
+                                <p className="truncate max-w-[180px]">{item.locationCity}</p>
+                                <span>·</span>
+                                <div className="flex items-center gap-1 text-black font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" /></svg>
+                                    <span>{item.rating || 'New'}</span>
+                                </div>
+                            </div>
+                            <div className="mt-1.5 flex items-baseline gap-1">
+                                <span className="font-semibold text-gray-900 text-[15px]">
+                                    {item.pricePerNight.toLocaleString()}₫
+                                </span>
+                                <span className="text-gray-500 text-sm"> đêm</span>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+            {visibleCount < items.length && (
+                <div className="mt-10 flex justify-center">
+                    <button 
+                        onClick={handleShowMore}
+                        className="border border-black bg-white hover:bg-gray-100 text-gray-900 font-bold py-3 px-8 rounded-lg transition transform active:scale-95"
+                    >
+                        Hiển thị thêm
+                    </button>
+                </div>
+            )}
+        </section>
+    );
+};
+
+export default function GuestHomePage() {
+    const [accommodations, setAccommodations] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const FIXED_IMAGE = "/image/ACC_001.jpg"; 
+
+    // --- HÀM GỌI API ĐÃ NÂNG CẤP ---
+    const fetchData = async (params?: SearchParams) => {
+        setLoading(true);
+        try {
+            // Xây dựng URL với Query Params
+            const query = new URLSearchParams();
+            
+            if (params) {
+                if (params.keyword) query.append('search', params.keyword);
+                if (params.guests > 1) query.append('guests', params.guests.toString());
+                if (params.checkIn) query.append('checkIn', params.checkIn);
+                if (params.checkOut) query.append('checkOut', params.checkOut);
+            }
+
+            const queryString = query.toString();
+            // Nếu có query string thì thêm dấu ?, không thì để trống
+            const url = `http://localhost:3000/accommodation${queryString ? `?${queryString}` : ''}`;
+            
+            console.log("Fetching URL:", url); // Debug xem URL đúng chưa
+
+            const res = await fetch(url);
+            const rawData = await res.json();
+            
+            const mappedData = rawData.map((item: any) => ({
+                id: item.accommodationId, 
+                title: item.Title, // Chú ý: Backend trả về Title (viết hoa)
+                locationCity: item.location?.City || 'Vietnam', 
+                imageUrl: FIXED_IMAGE, 
+                pricePerNight: Number(item.pricePerNight), 
+                rating: item.rating,
+            }));
+
+            setAccommodations(mappedData);
+        } catch (error) {
+            console.error("Lỗi:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Gọi lần đầu khi vào trang
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Logic lọc hiển thị frontend (Optional: có thể giữ hoặc bỏ tùy nhu cầu)
+    const hanoiList = accommodations.filter(item => item.locationCity?.includes('Hanoi') || item.locationCity?.includes('Ha Noi'));
+    const vungtauList = accommodations.filter(item => item.locationCity?.includes('Vung Tau'));
+    const exploreList = accommodations;
 
     return (
         <main className="min-h-screen bg-white pb-20">
-            <div className="pt-6 pb-8 border-b border-gray-100 mb-8 sticky top-20 bg-white z-40">
-                <HeroSearchBar />
+            <div className="pt-6 pb-4 border-b border-gray-100 mb-8 sticky top-20 bg-white z-40 shadow-sm">
+                
+                {/* --- TRUYỀN HÀM SEARCH VÀO ĐÂY --- */}
+                <HeroSearchBar onSearch={(params) => fetchData(params)} /> 
+
             </div>
+
             <div className="container mx-auto px-4 md:px-10">
-
-                {renderSection("Nơi lưu trú được ưa chuộng tại Hà Nội", hanoiList)}
-                {renderSection("Chỗ ở tại Vũng Tàu", vungtauList)}
-                {renderSection("Còn phòng tại Seoul vào tháng tới", seoulList)}
-
+                {/* Nếu đang loading thì hiện chữ Loading, nếu không thì hiện list */}
+                {loading ? (
+                    <div className="text-center py-10">Đang tải dữ liệu...</div>
+                ) : (
+                    <>
+                        {hanoiList.length > 0 && <ListingSection title="Nơi lưu trú tại Hà Nội" items={hanoiList} />}
+                        {vungtauList.length > 0 && <ListingSection title="Chỗ ở tại Vũng Tàu" items={vungtauList} />}
+                        
+                        <hr className="my-10 border-gray-200" />
+                        
+                        {/* Nếu search trả về rỗng */}
+                        {exploreList.length === 0 ? (
+                            <div className="text-center text-gray-500 text-lg">Không tìm thấy chỗ ở phù hợp.</div>
+                        ) : (
+                            <ListingGrid title="Khám phá những nơi ở khác" items={exploreList} />
+                        )}
+                    </>
+                )}
             </div>
         </main>
     );
