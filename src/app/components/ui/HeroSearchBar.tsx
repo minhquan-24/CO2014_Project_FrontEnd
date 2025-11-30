@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-// Định nghĩa kiểu dữ liệu params để truyền đi
+// Interface dữ liệu gửi đi
 export interface SearchParams {
     keyword: string;
     checkIn: string;
@@ -32,9 +32,7 @@ export default function HeroSearchBar({ onSearch }: Props) {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
+        if (e.key === 'Enter') handleSearch();
     };
 
     return (
@@ -71,7 +69,7 @@ export default function HeroSearchBar({ onSearch }: Props) {
                     type="date"
                     className="w-full outline-none text-sm text-gray-600 bg-transparent cursor-pointer"
                     value={checkOut}
-                    min={checkIn} // Validate ngày trả phải sau ngày nhận
+                    min={checkIn}
                     onChange={(e) => setCheckOut(e.target.value)}
                 />
             </div>
