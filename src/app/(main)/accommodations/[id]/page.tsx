@@ -21,12 +21,14 @@ export default function AccommodationDetailPage() {
     const [isDescExpanded, setIsDescExpanded] = useState(false); // State mở rộng mô tả
     const [showReviewModal, setShowReviewModal] = useState(false); // <--- MỚI: State Popup Review
 
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
     // --- GỌI API ---
     useEffect(() => {
         if (!id) return;
         const fetchDetail = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/accommodation/${id}`);
+                const res = await fetch(`${baseUrl}/accommodation/${id}`);
                 if (!res.ok) throw new Error('Failed');
                 const data = await res.json();
                 setRoom(data);
@@ -213,7 +215,7 @@ export default function AccommodationDetailPage() {
                 <div className="relative">
                     <div className="sticky top-28 border border-gray-200 rounded-xl shadow-xl p-6 bg-white">
                         <div className="flex justify-between items-end mb-4">
-                            <div><span className="text-2xl font-bold">{DATA.price.toLocaleString()}₫</span> <span className="text-gray-600">/ đêm</span></div>
+                            <div><span className="text-2xl font-bold">{DATA.price.toLocaleString('vi-VN')}₫</span> <span className="text-gray-600">/ đêm</span></div>
                         </div>
                         <div className="border border-gray-400 rounded-lg overflow-hidden mb-4">
                             <div className="flex border-b border-gray-400">
@@ -223,7 +225,7 @@ export default function AccommodationDetailPage() {
                             <div className="p-3"><label className="block text-[10px] font-bold uppercase">Khách</label><input type="number" min="1" className="w-full outline-none text-sm" value={guests} onChange={e => setGuests(Number(e.target.value))} /></div>
                         </div>
                         <button onClick={handleBook} disabled={isBooking} className="w-full bg-rose-600 text-white font-bold py-3 rounded-lg mb-4 hover:bg-rose-700 disabled:bg-gray-400">Đặt phòng</button>
-                        <div className="flex justify-between font-bold pt-4 border-t"><span>Tổng trước thuế</span><span>{(DATA.price * 5).toLocaleString()}₫</span></div>
+                        <div className="flex justify-between font-bold pt-4 border-t"><span>Tổng trước thuế</span><span>{(DATA.price * 5).toLocaleString('vi-VN')}₫</span></div>
                     </div>
                 </div>
             </div>
