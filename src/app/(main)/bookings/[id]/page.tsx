@@ -1,0 +1,1 @@
+// CO2014_Project_FrontEnd\src\app\(main)\bookings\[id]\page.tsx
