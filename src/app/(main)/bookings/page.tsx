@@ -1,3 +1,5 @@
+// CO2014_Project_FrontEnd\src\app\(main)\bookings\page.tsx
+
 'use client';
 
 import { useState } from 'react';
