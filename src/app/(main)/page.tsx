@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import HeroSearchBar, { SearchParams } from '@/app/components/ui/HeroSearchBar';
 import Link from 'next/link';
 
+
 // --- COMPONENT: Listing Section (Horizontal Scroll) ---
 const ListingSection = ({ title, items }: { title: string, items: any[] }) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -100,6 +101,7 @@ export default function GuestHomePage() {
     const [accommodations, setAccommodations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const FIXED_IMAGE = "/image/ACC_001.jpg"; 
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     const fetchData = async (params?: SearchParams) => {
         setLoading(true);
@@ -114,7 +116,7 @@ export default function GuestHomePage() {
             }
 
             const queryString = query.toString();
-            const url = `http://localhost:3000/accommodation${queryString ? `?${queryString}` : ''}`;
+            const url = `${baseUrl}/accommodation${queryString ? `?${queryString}` : ''}`;
             
             console.log("Fetching:", url);
 
@@ -132,6 +134,7 @@ export default function GuestHomePage() {
                 type: item.typeName,
                 subtype: item.subTypeName,
             }));
+            console.log("MAPPED DATA:", mappedData); // <--- BƯỚC QUAN TRỌNG
 
             setAccommodations(mappedData);
         } catch (error) {
