@@ -95,7 +95,7 @@ export const userApi = {
 
 
 export const hostApi = {
-  getDashboardStats: () => api.get<any>("/hosts/dashboard"), // Backend cần tạo route này
+  getDashboardStats: () => api.get<any>("/hosts/dashboard"),
   getMyListings: () => api.get<any[]>("/accommodation/host/my-listings"),
   createListing: (data: any) => api.post("/accommodation", data),
   updateListing: (id: string, data: any) => api.put(`/accommodation/${id}`, data),
