@@ -29,26 +29,20 @@ export default function AdminContactsPage() {
         fetchContacts(page);
     }, [page]);
 
-    // --- LOGIC TẠO SỐ TRANG (1, 2, 3 ... 10) ---
     const getPageNumbers = () => {
         const pages = [];
-        const maxVisibleButtons = 5; // Số lượng nút trang hiển thị tối đa (không tính ... và cuối)
+        const maxVisibleButtons = 5; 
 
         if (totalPages <= 7) {
-            // Nếu ít trang (<= 7) thì hiện hết: 1 2 3 4 5 6 7
             for (let i = 1; i <= totalPages; i++) {
                 pages.push(i);
             }
         } else {
-            // Nếu nhiều trang: Xử lý dấu ...
             if (page <= 4) {
-                // Đang ở đầu: 1 2 3 4 5 ... 100
                 pages.push(1, 2, 3, 4, 5, '...', totalPages);
             } else if (page >= totalPages - 3) {
-                // Đang ở cuối: 1 ... 96 97 98 99 100
                 pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
             } else {
-                // Đang ở giữa: 1 ... 49 50 51 ... 100
                 pages.push(1, '...', page - 1, page, page + 1, '...', totalPages);
             }
         }
