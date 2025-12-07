@@ -84,6 +84,8 @@ export const adminApi = {
     api.post<{ message: string; user: any }>("/admin/users", data),
   deleteUser: (id: string) => api.del<{ message: string }>(`/admin/users/${id}`),
   syncData: () => api.post<{ message: string }>("/admin/sync"),
+  getContacts: (page: number = 1, limit: number = 10) => 
+    api.get<any>(`/admin/contacts?page=${page}&limit=${limit}`),
 };
 
 export const userApi = {
@@ -91,3 +93,15 @@ export const userApi = {
   updateProfile: (data: any) => api.put<any>("/users/profile", data),
 };
 
+
+export const hostApi = {
+  getDashboardStats: () => api.get<any>("/hosts/dashboard"), // Backend cần tạo route này
+  getMyListings: () => api.get<any[]>("/accommodation/host/my-listings"),
+  createListing: (data: any) => api.post("/accommodation", data),
+  updateListing: (id: string, data: any) => api.put(`/accommodation/${id}`, data),
+  deleteListing: (id: string) => api.del(`/accommodation/${id}`),
+  getListingDetail: (id: string) => api.get<any>(`/accommodation/${id}`),
+  getAccommodationTypes: () => api.get<any[]>("/accommodation/types"),
+  getListingForEdit: (id: string) => api.get<any>(`/accommodation/host/edit/${id}`),
+
+};
