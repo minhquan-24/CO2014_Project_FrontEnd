@@ -84,6 +84,8 @@ export const adminApi = {
     api.post<{ message: string; user: any }>("/admin/users", data),
   deleteUser: (id: string) => api.del<{ message: string }>(`/admin/users/${id}`),
   syncData: () => api.post<{ message: string }>("/admin/sync"),
+  getContacts: (page: number = 1, limit: number = 10) => 
+    api.get<any>(`/admin/contacts?page=${page}&limit=${limit}`),
 };
 
 export const userApi = {

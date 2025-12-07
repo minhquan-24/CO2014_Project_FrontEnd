@@ -217,21 +217,20 @@ export default function HostDashboardPage() {
 
     // 3. Xử lý xóa
     const handleDelete = async (id: string) => {
-        if (confirm('Bạn có chắc muốn xóa căn nhà này? Hành động này không thể hoàn tác.')) {
+        if (confirm('Do you sure to delete?')) {
             try {
                 await hostApi.deleteListing(id);
-                alert(`✅ Đã xóa listing ${id} thành công!`);
-                // Gọi lại fetchData để cập nhật lại danh sách và số liệu thống kê (vì Trigger DB đã chạy)
+                alert(`✅ Delete listing ${id} success!`);
                 fetchData(); 
             } catch (error) {
-                alert('Xóa thất bại, vui lòng thử lại.');
+                alert('Delete failed, please try again');
             }
         }
     };
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
-            <p className="text-xl font-semibold text-gray-500 animate-pulse">Đang tải dữ liệu kinh doanh...</p>
+            <p className="text-xl font-semibold text-gray-500 animate-pulse">Loading..</p>
         </div>
     );
 
@@ -241,8 +240,7 @@ export default function HostDashboardPage() {
             {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Nhà của tôi</h1>
-                    <p className="text-gray-500 text-sm mt-1">Quản lý danh sách nhà và theo dõi hiệu quả kinh doanh.</p>
+                    <h1 className="text-3xl font-bold text-gray-900">My Accommodation</h1>
                 </div>
                 <Link
                     href="/host/listings/create"
@@ -251,7 +249,7 @@ export default function HostDashboardPage() {
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    Tạo mục cho thuê mới
+                    Create new accommodation
                 </Link>
             </div>
 
@@ -261,11 +259,10 @@ export default function HostDashboardPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                                <th className="p-4 w-24">Ảnh</th>
-                                <th className="p-4">Tên nhà / Địa điểm</th>
-                                {/* Đã xóa cột Trạng thái theo yêu cầu trước */}
-                                <th className="p-4">Giá / đêm</th>
-                                <th className="p-4 text-right">Hành động</th>
+                                <th className="p-4 w-24">Picture</th>
+                                <th className="p-4">Name / Location</th>
+                                <th className="p-4">Price per night</th>
+                                <th className="p-4 text-right">Modify</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -274,9 +271,9 @@ export default function HostDashboardPage() {
                                     <td colSpan={4} className="p-10 text-center text-gray-500">
                                         <div className="flex flex-col items-center gap-2">
                                             <span className="text-4xl">🏠</span>
-                                            <p>Bạn chưa có căn nhà nào.</p>
+                                            <p>You do not have any accommodations.</p>
                                             <Link href="/host/listings/create" className="text-rose-600 font-bold hover:underline">
-                                                Đăng nhà đầu tiên ngay!
+                                                Post the first house!!
                                             </Link>
                                         </div>
                                     </td>
@@ -308,12 +305,10 @@ export default function HostDashboardPage() {
                                             </div>
                                         </td>
 
-                                        {/* Cột Giá */}
                                         <td className="p-4 font-medium text-gray-900">
-                                            {Number(item.price).toLocaleString('vi-VN')}₫
+                                            {Number(item.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                         </td>
 
-                                        {/* Cột Hành động */}
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-3">
                                                 <Link
@@ -341,14 +336,13 @@ export default function HostDashboardPage() {
                 </div>
             </div>
 
-            {/* DASHBOARD STATS (DỮ LIỆU THẬT) */}
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Hiệu quả kinh doanh</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Business Statistics</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 {/* Card 1: Tổng số nhà */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
                     <div>
-                        <p className="text-gray-500 text-sm font-medium mb-1">Tổng số nhà</p>
+                        <p className="text-gray-500 text-sm font-medium mb-1">Total Accommodations</p>
                         <p className="text-3xl font-extrabold text-gray-900">{stats.totalListings}</p>
                     </div>
                     <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
@@ -359,7 +353,7 @@ export default function HostDashboardPage() {
                 {/* Card 2: Rating */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
                     <div>
-                        <p className="text-gray-500 text-sm font-medium mb-1">Uy tín trung bình</p>
+                        <p className="text-gray-500 text-sm font-medium mb-1">Average rating</p>
                         <div className="flex items-baseline gap-1">
                             <p className="text-3xl font-extrabold text-gray-900">{stats.averageRating}</p>
                             <span className="text-yellow-500 text-2xl">★</span>
@@ -373,7 +367,7 @@ export default function HostDashboardPage() {
                 {/* Card 3: Doanh thu */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between hover:shadow-md transition">
                     <div>
-                        <p className="text-gray-500 text-sm font-medium mb-1">Doanh thu năm 2024</p>
+                        <p className="text-gray-500 text-sm font-medium mb-1">Revenue (previous year)</p>
                         <p className="text-3xl font-extrabold text-green-600">{Number(stats.annualRevenue).toLocaleString('vi-VN')}₫</p>
                     </div>
                     <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-600">

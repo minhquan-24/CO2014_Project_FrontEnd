@@ -50,7 +50,7 @@ const ListingGrid = ({ title, items }: { title: string, items: any[] }) => {
             {visibleCount < items.length && (
                 <div className="mt-10 flex justify-center">
                     <button onClick={() => setVisibleCount(prev => prev + 8)} className="border border-black bg-white hover:bg-gray-100 text-gray-900 font-bold py-3 px-8 rounded-lg transition transform active:scale-95">
-                        Hiển thị thêm
+                        See more
                     </button>
                 </div>
             )}
@@ -87,8 +87,8 @@ const AccommodationCard = ({ item, isHorizontal }: { item: any, isHorizontal?: b
                 </div>
 
                 <div className="mt-1.5 flex items-baseline gap-1">
-                    <span className="font-semibold text-gray-900 text-[15px]">{item.pricePerNight.toLocaleString()}₫</span>
-                    <span className="text-gray-500 text-sm"> đêm</span>
+                    <span className="font-semibold text-gray-900 text-[15px]">{item.pricePerNight.toLocaleString()}$</span>
+                    <span className="text-gray-500 text-sm">/night</span>
                 </div>
             </div>
         </Link>
@@ -160,16 +160,16 @@ export default function GuestHomePage() {
 
             <div className="container mx-auto px-4 md:px-10">
                 {loading ? (
-                    <div className="text-center py-10">Đang tải dữ liệu...</div>
+                    <div className="text-center py-10">Loading...</div>
                 ) : (
                     <>
                         {hanoiList.length > 0 && <ListingSection title="Nơi lưu trú tại Hà Nội" items={hanoiList} />}
                         {vungtauList.length > 0 && <ListingSection title="Chỗ ở tại Vũng Tàu" items={vungtauList} />}
                         <hr className="my-10 border-gray-200" />
                         {exploreList.length === 0 ? (
-                            <div className="text-center text-gray-500 mt-10">Không tìm thấy chỗ ở phù hợp.</div>
+                            <div className="text-center text-gray-500 mt-10">No suitable accommodations.</div>
                         ) : (
-                            <ListingGrid title="Khám phá những nơi ở khác" items={exploreList} />
+                            <ListingGrid title="Explore another places" items={exploreList} />
                         )}
                     </>
                 )}

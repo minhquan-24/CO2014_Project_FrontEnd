@@ -1,242 +1,660 @@
+// 'use client';
+
+// import { useState, useEffect } from "react";
+// import Link from "next/link";
+
+// // Decode guestId from JWT stored in cookie
+// function getGuestIdFromJWT(): string | null {
+//   if (typeof window === "undefined") return null;
+
+//   // Read both possible cookie names
+//   const token =
+//     document.cookie
+//       .split("; ")
+//       .find((c) => c.startsWith("access_token="))
+//       ?.split("=")[1] ??
+//     document.cookie
+//       .split("; ")
+//       .find((c) => c.startsWith("accessToken="))
+//       ?.split("=")[1];
+
+//   if (!token) {
+//     console.warn("No JWT cookie found");
+//     return null;
+//   }
+
+//   try {
+//     const payload = JSON.parse(window.atob(token.split(".")[1]));
+//     return payload.sub ?? null;
+//   } catch (err) {
+//     console.error("JWT decode failed:", err);
+//     return null;
+//   }
+// }
+
+
+// export default function BookingsPage() {
+//   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+//   const [bookings, setBookings] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const [showCancelModal, setShowCancelModal] = useState(false);
+//   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+//   const [cancelReason, setCancelReason] = useState("");
+
+//   useEffect(() => {
+//     const fetchBookings = async () => {
+//       const guestId = getGuestIdFromJWT();
+//       if (!guestId) return;
+
+//       const res = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_URL}/booking/guest/${guestId}/history`
+//       );
+//       const data = await res.json();
+
+//       // Sort bookings: WaitingPayment → Pending → Confirmed → Completed → Cancelled
+//       const priority: any = {
+//         WaitingPayment: 1,
+//         Pending: 2,
+//         Confirmed: 3,
+//         Completed: 4,
+//         Cancelled: 5,
+//       };
+
+//       data.sort((a: any, b: any) => priority[a.Status] - priority[b.Status]);
+
+//       setBookings(data);
+//       setLoading(false);
+//     };
+
+//     fetchBookings();
+//   }, []);
+
+//   const handleConfirmCancel = async () => {
+//     if (!selectedBooking) return;
+
+//     const guestId = getGuestIdFromJWT();
+//     if (!guestId) {
+//       alert("You must be logged in to cancel a booking.");
+//       return;
+//     }
+
+//     try {
+//       const res = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_URL}/booking/${selectedBooking.Booking_ID}/cancel`,
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({
+//             guestId,
+//             reason: cancelReason || "No reason provided",
+//           }),
+//         }
+//       );
+
+//       const data = await res.json();
+
+//       if (!res.ok) {
+//         throw new Error(data.message || "Cancellation failed");
+//       }
+
+//     // Refund amount returned by stored procedure
+//       const refund = Number(data.refundAmount || 0);
+
+//     // Update UI
+//       setBookings((prev) =>
+//         prev.map((b) =>
+//           b.Booking_ID === selectedBooking.Booking_ID
+//             ? { ...b, Status: "Cancelled" }
+//             : b
+//         )
+//       );
+
+//       setShowCancelModal(false);
+//       setCancelReason("");
+
+//       alert(
+//         `✅ Booking cancelled!\nRefund issued: ${refund.toLocaleString("en-US", {
+//           style: "currency",
+//           currency: "USD",
+//         })}`
+//       );
+//     } catch (err: any) {
+//       alert(err.message || "Cancellation error");
+//     }
+//   };
+
+//   // Filter for Upcoming / Past tabs
+//   const filtered = bookings.filter((b) => {
+//     if (activeTab === "upcoming") {
+//       return ["Pending", "WaitingPayment", "Confirmed"].includes(b.Status);
+//     }
+//     return ["Completed", "Cancelled"].includes(b.Status);
+//   });
+
+//   if (loading)
+//     return (
+//       <div className="min-h-screen flex items-center justify-center text-gray-600">
+//         Loading your bookings...
+//       </div>
+//     );
+
+//   return (
+//     <div className="container mx-auto px-4 md:px-10 py-8 max-w-5xl">
+//       <h1 className="text-3xl font-bold mb-6 text-gray-900">
+//         Your Bookings
+//       </h1>
+
+//       {/* Tabs */}
+//       <div className="flex border-b border-gray-200 mb-6">
+//         <button
+//           onClick={() => setActiveTab("upcoming")}
+//           className={`pb-3 px-1 mr-6 text-sm font-medium ${
+//             activeTab === "upcoming"
+//               ? "border-b-2 border-black text-black"
+//               : "text-gray-500 hover:text-gray-700"
+//           }`}
+//         >
+//           Upcoming
+//         </button>
+
+//         <button
+//           onClick={() => setActiveTab("past")}
+//           className={`pb-3 px-1 mr-6 text-sm font-medium ${
+//             activeTab === "past"
+//               ? "border-b-2 border-black text-black"
+//               : "text-gray-500 hover:text-gray-700"
+//           }`}
+//         >
+//           Past Trips
+//         </button>
+//       </div>
+
+//       {/* List of bookings */}
+//       <div className="space-y-6">
+//         {filtered.length === 0 ? (
+//           <div className="text-center p-10 bg-gray-50 rounded-lg">
+//             <p className="text-gray-500">No bookings found.</p>
+//             <Link
+//               href="/search"
+//               className="text-rose-600 font-bold hover:underline mt-2 inline-block"
+//             >
+//               Find a place to stay
+//             </Link>
+//           </div>
+//         ) : (
+//           filtered.map((b) => (
+//             <div
+//               key={b.Booking_ID}
+//               className="flex flex-col md:flex-row border rounded-xl overflow-hidden shadow-sm bg-white hover:shadow-md transition"
+//             >
+//               {/* Placeholder image for now */}
+//               <div className="md:w-64 h-48 bg-gray-200 relative flex items-center justify-center">
+//                 <span
+//                   className={`absolute top-3 left-3 px-2 py-1 text-xs font-bold rounded text-white ${
+//                     b.Status === "WaitingPayment"
+//                       ? "bg-blue-600"
+//                       : b.Status === "Pending"
+//                       ? "bg-yellow-500"
+//                       : b.Status === "Confirmed"
+//                       ? "bg-green-600"
+//                       : b.Status === "Cancelled"
+//                       ? "bg-red-600"
+//                       : "bg-gray-600"
+//                   }`}
+//                 >
+//                   {b.Status}
+//                 </span>
+//                 <span className="text-gray-500 text-sm">No image</span>
+//               </div>
+
+//               {/* Booking Info */}
+//               <div className="flex-1 p-6 flex flex-col justify-between">
+//                 <div>
+//                   <h3 className="text-xl font-bold text-gray-900">
+//                     Booking #{b.Booking_ID}
+//                   </h3>
+
+//                   <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
+//                     <div>
+//                       <span className="block font-bold text-xs uppercase text-gray-400">
+//                         Check-in
+//                       </span>
+//                       {new Date(b.Check_in).toLocaleDateString("en-US")}
+//                     </div>
+//                     <div>
+//                       <span className="block font-bold text-xs uppercase text-gray-400">
+//                         Check-out
+//                       </span>
+//                       {new Date(b.Check_out).toLocaleDateString("en-US")}
+//                     </div>
+//                   </div>
+
+//                   <div className="mt-4">
+//                     <span className="block font-bold text-xs uppercase text-gray-400">
+//                       Total Price
+//                     </span>
+//                     <span className="text-lg font-semibold">
+//                       {Number(b.Total_Price).toLocaleString("en-US", {
+//                         style: "currency",
+//                         currency: "USD",
+//                       })}
+//                     </span>
+//                   </div>
+//                 </div>
+
+//                 {/* Action buttons */}
+//                 <div className="mt-6 flex justify-end gap-3">
+
+//                   {/* Pay Now */}
+//                   {b.Status === "WaitingPayment" && (
+//                     <button
+//                       onClick={() =>
+//                         (window.location.href = `/payment/${b.Booking_ID}`)
+//                       }
+//                       className="px-4 py-2 text-sm font-bold text-white bg-rose-600 rounded-lg hover:bg-rose-700"
+//                     >
+//                       Pay Now
+//                     </button>
+//                   )}
+
+//                   {/* Cancel */}
+//                   {["Pending", "Confirmed"].includes(b.Status) && (
+//                     <button
+//                       onClick={() => {
+//                         setSelectedBooking(b);
+//                         setShowCancelModal(true);
+//                       }}
+//                       className="px-4 py-2 text-sm font-bold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
+//                     >
+//                       Cancel Booking
+//                     </button>
+//                   )}
+
+//                   {/* Completed */}
+//                   {b.Status === "Completed" && (
+//                     <span className="text-sm font-medium text-green-600">
+//                       ✓ Completed
+//                     </span>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+//           ))
+//         )}
+//       </div>
+
+//       {/* Cancel Modal */}
+//       {showCancelModal && selectedBooking && (
+//         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+//           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+//             <h3 className="text-xl font-bold mb-4">Cancel this booking?</h3>
+//             <p className="text-gray-600 mb-4 text-sm">
+//               Are you sure you want to cancel booking #{selectedBooking.Booking_ID}?
+//             </p>
+
+//             <textarea
+//               className="w-full border rounded-lg p-3 text-sm"
+//               rows={3}
+//               placeholder="Reason for cancellation..."
+//               value={cancelReason}
+//               onChange={(e) => setCancelReason(e.target.value)}
+//             />
+
+//             <div className="flex gap-3 mt-6">
+//               <button
+//                 onClick={() => setShowCancelModal(false)}
+//                 className="flex-1 py-3 font-bold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
+//               >
+//                 Go Back
+//               </button>
+//               <button
+//                 onClick={handleConfirmCancel}
+//                 className="flex-1 py-3 font-bold text-white bg-red-600 rounded-lg hover:bg-red-700"
+//               >
+//                 Confirm Cancel
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
-interface Trip {
-    id: string;
-    propertyName: string;
-    hostName: string;
-    checkIn: string;
-    checkOut: string;
-    price: number;
-    image: string;
-    status: 'Confirmed' | 'Pending' | 'Completed' | 'Cancelled';
-    isReviewed: boolean;
+// Decode guestId from JWT stored in cookie
+function getGuestIdFromJWT(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const token =
+    document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("access_token="))
+      ?.split("=")[1] ??
+    document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("accessToken="))
+      ?.split("=")[1];
+
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(window.atob(token.split(".")[1]));
+    return payload.sub ?? null;
+  } catch (err) {
+    console.error("JWT decode failed:", err);
+    return null;
+  }
 }
 
-const INITIAL_TRIPS: Trip[] = [
-    // Upcoming
-    { id: 'BK-001', propertyName: 'Luxury Villa Vung Tau', hostName: 'Minh Tâm', checkIn: '2025-11-20', checkOut: '2025-11-22', price: 5000000, image: '/image/ACC_001.jpg', status: 'Confirmed', isReviewed: false },
-    { id: 'BK-002', propertyName: 'Căn hộ Quận 1', hostName: 'Hồng Phát', checkIn: '2025-12-01', checkOut: '2025-12-05', price: 2500000, image: '/image/ACC_002.jpg', status: 'Pending', isReviewed: false },
+export default function BookingsPage() {
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    // Past
-    { id: 'BK-003', propertyName: 'Homestay Đà Lạt', hostName: 'Thanh Bằng', checkIn: '2024-01-10', checkOut: '2024-01-12', price: 1200000, image: '/image/ACC_001.jpg', status: 'Completed', isReviewed: false },
-    { id: 'BK-004', propertyName: 'Resort Phú Quốc', hostName: 'Tấn Tài', checkIn: '2023-12-20', checkOut: '2023-12-25', price: 15000000, image: '/image/ACC_002.jpg', status: 'Completed', isReviewed: true },
-    { id: 'BK-005', propertyName: 'Nhà nghỉ Bình dân', hostName: 'Minh Quân', checkIn: '2023-11-01', checkOut: '2023-11-02', price: 500000, image: '/image/ACC_003.jpg', status: 'Cancelled', isReviewed: false },
-];
+  // --- STATE CHO CANCEL ---
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
-export default function MyTripsPage() {
-    const [trips, setTrips] = useState<Trip[]>(INITIAL_TRIPS);
-    const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+  // --- STATE CHO REVIEW (MỚI) ---
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5); // Mặc định 5 sao
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
-    const [showCancelModal, setShowCancelModal] = useState(false);
-    const [showReviewModal, setShowReviewModal] = useState(false);
-    const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  useEffect(() => {
+    const fetchBookings = async () => {
+      const guestId = getGuestIdFromJWT();
+      if (!guestId) return;
 
-    const [cancelReason, setCancelReason] = useState('');
-    const [reviewRating, setReviewRating] = useState(5);
-    const [reviewComment, setReviewComment] = useState('');
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/guest/${guestId}/history`
+      );
+      const data = await res.json();
 
-    // ---(Call sp_CancelBooking) ---
-    const handleCancel = () => {
-        if (!selectedTrip) return;
+      // Sắp xếp thứ tự ưu tiên
+      const priority: any = {
+        WaitingPayment: 1,
+        Pending: 2,
+        Confirmed: 3,
+        Completed: 4,
+        Cancelled: 5,
+      };
 
-        // Giả lập tính toán hoàn tiền
-        const refundAmount = selectedTrip.price * 0.5;
-        const refundPercent = "50%";
+      data.sort((a: any, b: any) => priority[a.Status] - priority[b.Status]);
 
-        const updatedTrips = trips.map(t =>
-            t.id === selectedTrip.id ? { ...t, status: 'Cancelled' as const } : t
-        );
-        setTrips(updatedTrips);
+      // Thêm cờ local 'isReviewed' để quản lý UI (Nếu API chưa trả về, mặc định false)
+      // Lưu ý: Nếu muốn nút 'Reviewed' giữ nguyên sau khi F5, Backend cần trả về trường isReviewed trong API history
+      const mappedData = data.map((b: any) => ({
+        ...b,
+        isReviewed: false // Tạm thời set false, khi review xong sẽ set true
+      }));
 
-        setShowCancelModal(false);
-        setCancelReason('');
-        alert(`✅ Đã hủy thành công!\nBooking ID: ${selectedTrip.id}\nSố tiền hoàn lại: ${refundAmount.toLocaleString()}₫ (${refundPercent})`);
+      setBookings(mappedData);
+      setLoading(false);
     };
 
-    const handleSubmitReview = () => {
-        if (!selectedTrip) return;
+    fetchBookings();
+  }, []);
 
-        const updatedTrips = trips.map(t =>
-            t.id === selectedTrip.id ? { ...t, isReviewed: true } : t
-        );
-        setTrips(updatedTrips);
+  // --- XỬ LÝ HỦY PHÒNG ---
+  const handleConfirmCancel = async () => {
+    if (!selectedBooking) return;
+    const guestId = getGuestIdFromJWT();
+    if (!guestId) return alert("Please log in.");
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/booking/${selectedBooking.Booking_ID}/cancel`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            guestId,
+            reason: cancelReason || "No reason provided",
+          }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      const refund = Number(data.refundAmount || 0);
+
+      // Cập nhật UI
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.Booking_ID === selectedBooking.Booking_ID
+            ? { ...b, Status: "Cancelled" }
+            : b
+        )
+      );
+      setShowCancelModal(false);
+      setCancelReason("");
+      alert(`✅ Booking cancelled! Refund: ${refund.toLocaleString("en-US", { style: "currency", currency: "USD" })}`);
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  // --- XỬ LÝ REVIEW (MỚI) ---
+  const openReviewModal = (booking: any) => {
+    setSelectedBooking(booking);
+    setReviewRating(5);
+    setReviewComment("");
+    setShowReviewModal(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedBooking) return;
+    const guestId = getGuestIdFromJWT();
+    if (!guestId) return;
+
+    setIsSubmittingReview(true);
+    try {
+        const payload = {
+            guestId,
+            accommodationId: selectedBooking.Accommodation_ID,
+            comment: reviewComment,
+            rating: reviewRating
+        };
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reviews`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.message || 'Failed to post review');
+        }
+
+        alert("✅ Review submitted successfully!");
+        
+        // Cập nhật UI: Đổi nút thành Reviewed
+        setBookings(prev => prev.map(b => 
+            b.Booking_ID === selectedBooking.Booking_ID 
+            ? { ...b, isReviewed: true } 
+            : b
+        ));
 
         setShowReviewModal(false);
-        setReviewComment('');
-        alert(`✅ Đánh giá đã được gửi!\nCảm ơn bạn đã review chuyến đi tại ${selectedTrip.propertyName}.`);
-        // Trigger trg_reviews_after_insert sẽ chạy ngầm trong DB thật
-    };
 
-    const displayTrips = trips.filter(trip => {
-        if (activeTab === 'upcoming') return trip.status === 'Confirmed' || trip.status === 'Pending';
-        return trip.status === 'Completed' || trip.status === 'Cancelled';
-    });
+    } catch (error: any) {
+        alert(error.message);
+    } finally {
+        setIsSubmittingReview(false);
+    }
+  };
 
-    return (
-        <div className="container mx-auto px-4 md:px-10 py-8 max-w-5xl min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Chuyến đi</h1>
+  // Filter tabs
+  const filtered = bookings.filter((b) => {
+    if (activeTab === "upcoming") {
+      return ["Pending", "WaitingPayment", "Confirmed"].includes(b.Status);
+    }
+    return ["Completed", "Cancelled"].includes(b.Status);
+  });
 
-            <div className="flex border-b border-gray-200 mb-6">
-                <button
-                    onClick={() => setActiveTab('upcoming')}
-                    className={`pb-3 px-1 mr-6 text-sm font-medium transition ${activeTab === 'upcoming' ? 'border-b-2 border-gray-900 text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    Sắp tới
-                </button>
-                <button
-                    onClick={() => setActiveTab('past')}
-                    className={`pb-3 px-1 mr-6 text-sm font-medium transition ${activeTab === 'past' ? 'border-b-2 border-gray-900 text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    Đã hoàn tất
-                </button>
-            </div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-600">Loading...</div>;
 
-            {/* LIST TRIPS */}
-            <div className="space-y-6">
-                {displayTrips.length === 0 ? (
-                    <div className="text-center py-10 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500">Chưa có chuyến đi nào.</p>
-                        <Link href="/search" className="text-rose-600 font-bold hover:underline mt-2 inline-block">Đặt phòng ngay</Link>
-                    </div>
-                ) : (
-                    displayTrips.map(trip => (
-                        <div key={trip.id} className="flex flex-col md:flex-row border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition bg-white">
-                            {/* Ảnh */}
-                            <div className="md:w-64 h-48 md:h-auto relative bg-gray-200">
-                                <img src={trip.image || '/images/placeholder.jpg'} alt={trip.propertyName} className="w-full h-full object-cover" />
-                                <div className={`absolute top-3 left-3 px-2 py-1 text-xs font-bold rounded text-white
-                  ${trip.status === 'Confirmed' ? 'bg-green-600' :
-                                        trip.status === 'Pending' ? 'bg-yellow-500' :
-                                            trip.status === 'Cancelled' ? 'bg-red-500' : 'bg-gray-600'}`}>
-                                    {trip.status}
-                                </div>
-                            </div>
+  return (
+    <div className="container mx-auto px-4 md:px-10 py-8 max-w-5xl min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-gray-900">Your Bookings</h1>
 
-                            <div className="p-6 flex-1 flex flex-col justify-between">
-                                <div>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-gray-900 mb-1">{trip.propertyName}</h3>
-                                            <p className="text-sm text-gray-500">Chủ nhà: {trip.hostName}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-lg font-bold">{trip.price.toLocaleString()}₫</p>
-                                        </div>
-                                    </div>
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button onClick={() => setActiveTab("upcoming")} className={`pb-3 px-1 mr-6 text-sm font-medium ${activeTab === "upcoming" ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-gray-700"}`}>Upcoming</button>
+        <button onClick={() => setActiveTab("past")} className={`pb-3 px-1 mr-6 text-sm font-medium ${activeTab === "past" ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-gray-700"}`}>Past Trips</button>
+      </div>
 
-                                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                        <div>
-                                            <span className="block font-bold text-gray-400 text-xs uppercase">Check-in</span>
-                                            {trip.checkIn}
-                                        </div>
-                                        <div>
-                                            <span className="block font-bold text-gray-400 text-xs uppercase">Check-out</span>
-                                            {trip.checkOut}
-                                        </div>
-                                    </div>
-                                </div>
+      {/* Booking List */}
+      <div className="space-y-6">
+        {filtered.length === 0 ? (
+          <div className="text-center p-10 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">No bookings found.</p>
+            <Link href="/" className="text-rose-600 font-bold hover:underline mt-2 inline-block">Find a place to stay</Link>
+          </div>
+        ) : (
+          filtered.map((b) => (
+            <div key={b.Booking_ID} className="flex flex-col md:flex-row border rounded-xl overflow-hidden shadow-sm bg-white hover:shadow-md transition">
+              
+              {/* Image */}
+              <div className="md:w-64 h-48 bg-gray-200 relative flex items-center justify-center">
+                <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-bold rounded text-white 
+                    ${b.Status === "WaitingPayment" ? "bg-blue-600" : 
+                      b.Status === "Pending" ? "bg-yellow-500" : 
+                      b.Status === "Confirmed" ? "bg-green-600" : 
+                      b.Status === "Cancelled" ? "bg-red-600" : "bg-gray-600"}`}>
+                  {b.Status}
+                </span>
+                {/* Nếu API trả về ảnh thì dùng b.Image, không thì placeholder */}
+                <img src="/image/ACC_001.jpg" className="w-full h-full object-cover" alt="Room" />
+              </div>
 
-                                <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
-
-                                    {(trip.status === 'Confirmed' || trip.status === 'Pending') && (
-                                        <button
-                                            onClick={() => { setSelectedTrip(trip); setShowCancelModal(true); }}
-                                            className="text-sm font-bold text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg transition border border-gray-300"
-                                        >
-                                            Hủy đặt phòng
-                                        </button>
-                                    )}
-
-                                    {trip.status === 'Completed' && !trip.isReviewed && (
-                                        <button
-                                            onClick={() => { setSelectedTrip(trip); setShowReviewModal(true); }}
-                                            className="text-sm font-bold text-white bg-black hover:bg-gray-800 px-4 py-2 rounded-lg transition"
-                                        >
-                                            Viết đánh giá
-                                        </button>
-                                    )}
-
-                                    {trip.status === 'Completed' && trip.isReviewed && (
-                                        <span className="text-sm font-medium text-green-600 flex items-center gap-1">
-                                            ✓ Đã đánh giá
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
-
-            {/* HỦY PHÒNG */}
-            {showCancelModal && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-                        <h3 className="text-xl font-bold mb-4">Hủy chuyến đi này?</h3>
-                        <p className="text-gray-600 mb-4 text-sm">
-                            Bạn có chắc chắn muốn hủy đặt phòng tại <span className="font-bold">{selectedTrip?.propertyName}</span>?
-                            <br />Dựa trên chính sách hủy, bạn sẽ được hoàn lại một phần tiền.
-                        </p>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Lý do hủy:</label>
-                        <textarea
-                            className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-black outline-none"
-                            rows={3}
-                            placeholder="Ví dụ: Thay đổi kế hoạch..."
-                            value={cancelReason}
-                            onChange={(e) => setCancelReason(e.target.value)}
-                        />
-                        <div className="flex gap-3 mt-6">
-                            <button onClick={() => setShowCancelModal(false)} className="flex-1 py-3 font-bold text-gray-700 hover:bg-gray-100 rounded-lg">Quay lại</button>
-                            <button onClick={handleCancel} className="flex-1 py-3 font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg">Xác nhận Hủy</button>
-                        </div>
-                    </div>
+              {/* Info */}
+              <div className="flex-1 p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Booking #{b.Booking_ID}</h3>
+                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div><span className="block font-bold text-xs uppercase text-gray-400">Check-in</span>{new Date(b.Check_in).toLocaleDateString("en-US")}</div>
+                    <div><span className="block font-bold text-xs uppercase text-gray-400">Check-out</span>{new Date(b.Check_out).toLocaleDateString("en-US")}</div>
+                  </div>
+                  <div className="mt-4">
+                    <span className="block font-bold text-xs uppercase text-gray-400">Total Price</span>
+                    <span className="text-lg font-semibold">{Number(b.Total_Price).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
+                  </div>
                 </div>
-            )}
 
-            {/* REVIEW */}
-            {showReviewModal && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-                        <h3 className="text-xl font-bold mb-2">Đánh giá chuyến đi</h3>
-                        <p className="text-gray-500 text-sm mb-4">Tại {selectedTrip?.propertyName}</p>
+                {/* Actions */}
+                <div className="mt-6 flex justify-end gap-3 items-center">
+                  
+                  {/* Pay Now */}
+                  {b.Status === "WaitingPayment" && (
+                    <button onClick={() => (window.location.href = `/payment/${b.Booking_ID}`)} className="px-4 py-2 text-sm font-bold text-white bg-rose-600 rounded-lg hover:bg-rose-700">Pay Now</button>
+                  )}
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Bạn chấm mấy sao?</label>
-                            <div className="flex gap-2">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <button
-                                        key={star}
-                                        onClick={() => setReviewRating(star)}
-                                        className={`text-2xl ${star <= reviewRating ? 'text-yellow-400' : 'text-gray-300'}`}
-                                    >
-                                        ★
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                  {/* Cancel */}
+                  {["Pending", "Confirmed"].includes(b.Status) && (
+                    <button onClick={() => { setSelectedBooking(b); setShowCancelModal(true); }} className="px-4 py-2 text-sm font-bold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100">Cancel Booking</button>
+                  )}
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Nhận xét của bạn</label>
-                            <textarea
-                                className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-black outline-none"
-                                rows={4}
-                                placeholder="Hãy chia sẻ trải nghiệm của bạn..."
-                                value={reviewComment}
-                                onChange={(e) => setReviewComment(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="flex gap-3 mt-6">
-                            <button onClick={() => setShowReviewModal(false)} className="flex-1 py-3 font-bold text-gray-700 hover:bg-gray-100 rounded-lg">Đóng</button>
-                            <button onClick={handleSubmitReview} className="flex-1 py-3 font-bold text-white bg-black hover:bg-gray-800 rounded-lg">Gửi đánh giá</button>
-                        </div>
+                  {/* Completed & Review Logic */}
+                  {b.Status === "Completed" && (
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-green-600 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" /></svg>
+                            Completed
+                        </span>
+                        
+                        {/* Nút Review */}
+                        {b.isReviewed ? (
+                            <button disabled className="px-4 py-2 text-sm font-bold text-gray-400 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed">
+                                Reviewed
+                            </button>
+                        ) : (
+                            <button 
+                                onClick={() => openReviewModal(b)}
+                                className="px-4 py-2 text-sm font-bold text-gray-800 border border-black rounded-lg hover:bg-gray-100 flex items-center gap-2 transition"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                                Write a Review
+                            </button>
+                        )}
                     </div>
+                  )}
                 </div>
-            )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
+      {/* CANCEL MODAL */}
+      {showCancelModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl animate-fade-in-up">
+            <h3 className="text-xl font-bold mb-4">Cancel this booking?</h3>
+            <p className="text-gray-600 mb-4 text-sm">Are you sure you want to cancel booking #{selectedBooking.Booking_ID}?</p>
+            <textarea className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none" rows={3} placeholder="Reason for cancellation..." value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowCancelModal(false)} className="flex-1 py-3 font-bold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100">Go Back</button>
+              <button onClick={handleConfirmCancel} className="flex-1 py-3 font-bold text-white bg-red-600 rounded-lg hover:bg-red-700">Confirm Cancel</button>
+            </div>
+          </div>
         </div>
-    );
+      )}
+
+      {/* REVIEW MODAL (MỚI) */}
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl animate-fade-in-up">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold">Rate your stay</h3>
+                    <button onClick={() => setShowReviewModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+                
+                {/* Rating Stars */}
+                <div className="flex justify-center gap-2 mb-6">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <button 
+                            key={star} 
+                            onClick={() => setReviewRating(star)}
+                            className={`text-4xl transition transform hover:scale-110 ${star <= reviewRating ? 'text-yellow-400' : 'text-gray-300'}`}
+                        >
+                            ★
+                        </button>
+                    ))}
+                </div>
+                <div className="text-center text-sm font-bold text-gray-600 mb-4">
+                    {reviewRating === 5 ? "Excellent!" : reviewRating >= 4 ? "Good" : "Average"}
+                </div>
+
+                <textarea 
+                    className="w-full border rounded-lg p-3 text-sm focus:ring-2 focus:ring-black outline-none mb-6" 
+                    rows={4} 
+                    placeholder="Share your experience..." 
+                    value={reviewComment} 
+                    onChange={(e) => setReviewComment(e.target.value)} 
+                />
+
+                <button 
+                    onClick={handleSubmitReview} 
+                    disabled={isSubmittingReview}
+                    className="w-full py-3 font-bold text-white bg-black rounded-lg hover:bg-gray-800 disabled:bg-gray-400"
+                >
+                    {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+            </div>
+        </div>
+      )}
+
+    </div>
+  );
 }

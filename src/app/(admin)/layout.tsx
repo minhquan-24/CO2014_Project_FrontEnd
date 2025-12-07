@@ -28,15 +28,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h1 className="text-2xl font-bold text-rose-500">Airbkb Admin</h1>
         </div>
         <nav className="flex-1 p-4 space-y-2">
-          <Link href="/admin" className="block px-4 py-3 rounded bg-gray-800 text-white font-bold">
+          <Link href="/admin" className="block px-4 py-3 rounded hover:bg-red-800 text-white font-bold">
             Dashboard & Users
           </Link>
-          {/* <div className="block px-4 py-3 rounded text-gray-400 hover:bg-gray-800 cursor-not-allowed">
-            Reports (Coming soon)
-          </div>
-          <div className="block px-4 py-3 rounded text-gray-400 hover:bg-gray-800 cursor-not-allowed">
-            Settings
-          </div> */}
+          <Link href="/admin/contacts" className="block px-4 py-3 rounded hover:bg-red-800 text-gray-300 text-white font-bold ">
+            Contact Viewer
+          </Link>
         </nav>
         <div className="p-4 border-t border-gray-800">
           <button 

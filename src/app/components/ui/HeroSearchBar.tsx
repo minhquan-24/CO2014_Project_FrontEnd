@@ -40,10 +40,10 @@ export default function HeroSearchBar({ onSearch }: Props) {
             
             {/* 1. ĐỊA ĐIỂM */}
             <div className="flex-1 px-6 border-r border-gray-200 relative">
-                <label className="block text-xs font-bold text-gray-800 ml-1">Địa điểm</label>
+                <label className="block text-xs font-bold text-gray-800 ml-1">Location</label>
                 <input 
                     type="text" 
-                    placeholder="Tìm kiếm điểm đến" 
+                    placeholder="Find the destination" 
                     className="w-full outline-none text-sm text-gray-600 placeholder-gray-400 bg-transparent truncate"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
@@ -53,7 +53,7 @@ export default function HeroSearchBar({ onSearch }: Props) {
 
             {/* 2. NHẬN PHÒNG */}
             <div className="hidden md:block flex-1 px-6 border-r border-gray-200">
-                <label className="block text-xs font-bold text-gray-800">Nhận phòng</label>
+                <label className="block text-xs font-bold text-gray-800">Check In</label>
                 <input 
                     type="date"
                     className="w-full outline-none text-sm text-gray-600 bg-transparent cursor-pointer"
@@ -64,7 +64,7 @@ export default function HeroSearchBar({ onSearch }: Props) {
             
             {/* 3. TRẢ PHÒNG */}
             <div className="hidden md:block flex-1 px-6 border-r border-gray-200">
-                <label className="block text-xs font-bold text-gray-800">Trả phòng</label>
+                <label className="block text-xs font-bold text-gray-800">Check Out</label>
                 <input 
                     type="date"
                     className="w-full outline-none text-sm text-gray-600 bg-transparent cursor-pointer"
@@ -76,7 +76,7 @@ export default function HeroSearchBar({ onSearch }: Props) {
 
             {/* 4. KHÁCH */}
             <div className="hidden md:block flex-1 px-6 relative">
-                <label className="block text-xs font-bold text-gray-800">Khách</label>
+                <label className="block text-xs font-bold text-gray-800">Number of Guest</label>
                 <input 
                     type="number"
                     min={1}
